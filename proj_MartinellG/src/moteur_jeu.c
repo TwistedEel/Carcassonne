@@ -10,6 +10,7 @@ struct tuile_s{
 	char cotes[4];
 	char centre;
     int posee;
+    int posable;
 };
 
 struct joueur_s{
@@ -80,8 +81,10 @@ void melange_tuiles(){
     }
 }
 
-void afficher_grille(){
+void afficher_grille(int ipioche){
     int i,j;
+    system("clear");
+    printf("Plateau actuel :\n");
     for(i=jg-1;i<=jd+1;++i){
         printf("  %2d  ",i);
     }
@@ -103,7 +106,11 @@ void afficher_grille(){
         printf("|");
         for(j=jg-1;j<=jd+1;j++){
             if(tab_jeu[i][j].posee==0){
-                printf("     |");
+                if(tab_jeu[i][j].posable==1){
+                    printf("  X  |");
+                }else{
+                    printf("     |");
+                }
             }else{
                 printf("%c %c %c|",tab_jeu[i][j].cotes[3],tab_jeu[i][j].centre,tab_jeu[i][j].cotes[1]);
             }
@@ -124,21 +131,25 @@ void afficher_grille(){
         }
         printf("\n");
     }
+    printf("Tuile en main :\n");
+    affiche_tuile(&pioche[ipioche]);
+    return;
 }
 
-void tourner_tuile(struct tuile_s *t){
+int tourner_tuile(struct tuile_s *t,int encore){
     char reponse[10],tmp;
-    int i,j,encore=1,valide=0,k;
-    printf("Voulez vous tournez la tuile de 90° dans le sens anti-horaire ?\n(Répondre 'oui' ou non') : ");
-    scanf("%s", reponse);
-    if(strcmp("non",reponse)==0){
-        return;
+    int i,j,valide=0,k;
+    if (encore == 2){
+        printf("Voulez vous tournez la tuile de 90° dans le sens anti-horaire ?\n(Répondre 'oui' ou non') : ");
+        scanf("%s", reponse);
+        if(strcmp("non",reponse)==0){
+            return 0;
+        }
+        if(strcmp("oui",reponse)==0){
+                valide = 1;
+        }
     }
-    if(strcmp("oui",reponse)==0){
-            valide = 1;
-    }
-    if(valide!=0){
-        while(encore==1){
+    if(valide!=0 || encore!=2){
             printf("Combien de fois ? \n(Entrer un chiffre entre 1 et 3) :");
             scanf("%d",&k);
             for(i=0;i<k;++i){
@@ -148,35 +159,67 @@ void tourner_tuile(struct tuile_s *t){
                 }
                 t->cotes[3]=tmp;
             }
-            printf("Tuile tournée : \n");
-            affiche_tuile(t);
-            valide = 0;
-            while(valide==0){
-                printf("Voulez-vous encore tourner la tuile ? (oui ou non) : ");
-                scanf("%s", reponse);
-                valide = 1;
-                if(strcmp("non",reponse)==0){
-                    encore = 0;
-                }else{
-                    if(strcmp("oui",reponse)!=0){
-                        printf("La réponse n'est pas valide, entrez une réponse valide svp : \n");
-                        valide = 0;
-                    }
-                }
-            }
-        }
+            return 1;
     }else{
         printf("La réponse n'est pas valide, entrez une réponse valide svp : \n");
-        tourner_tuile(t);
-        return;
+        return tourner_tuile(t,encore);
     }
 }
 
-void posable(struct tuile_s t){
-	
-	
-	
-	
+int f_encore(){
+    int valide = 0;
+    char reponse[10];
+    while(valide==0){
+        printf("Voulez-vous encore tourner la tuile ? (oui ou non) : ");
+        scanf("%s", reponse);
+        valide = 1;
+        if(strcmp("non",reponse)==0){
+            return 0;
+        }else{
+            if(strcmp("oui",reponse)!=0){
+                printf("La réponse n'est pas valide, entrez une réponse valide svp : \n");
+                valide = 0;
+            }else{
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+int compatible(struct tuile_s * t1,struct tuile_s * t2, int face1, int face2){
+    if(t2->posee == 0){
+        return 1;
+    }else{
+        if(((t1->cotes[face1]=='b' || t1->cotes[face1]=='v') && (t2->cotes[face2]=='b' || t2->cotes[face2]=='v')) || ((t1->cotes[face1]=='r') && (t2->cotes[face2]=='r')) || ((t1->cotes[face1]=='p') && (t2->cotes[face2]=='p'))){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+}
+
+void f_posable(struct tuile_s * t){
+    int i,j;
+    for(i=ig-1;i<=id+1;++i){
+        for(j=jg-1;j<=jd+1;++j){
+            if(tab_jeu[i][j].posee == 0){
+                if((tab_jeu[i-1][j].posee == 0) && (tab_jeu[i][j+1].posee == 0) && (tab_jeu[i+1][j].posee == 0) && (tab_jeu[i][j-1].posee == 0)){
+                    tab_jeu[i][j].posable = 0;
+                }else{
+                    if((compatible(t,&tab_jeu[i-1][j],0,2) == 1) && (compatible(t,&tab_jeu[i][j+1],1,3) == 1) && (compatible(t,&tab_jeu[i+1][j],2,0) == 1) && (compatible(t,&tab_jeu[i][j-1],3,1) == 1)){
+                        tab_jeu[i][j].posable = 1;
+                    }else{
+                        tab_jeu[i][j].posable = 0;
+                    }
+                }
+            }else{
+                tab_jeu[i][j].posable = 0;
+            }
+        }
+    }
+
+
 	return;
 }
 
@@ -186,7 +229,7 @@ void poser_tuile(int y, int x, int i){
     sous la forme (x,y), cependant pour la vision humaine de la grille
     x correspond à la colonne et y à la ligne alors que dans le programme
     pour tab[i][j] on a i qui correspond à la ligne et j à la colonne,
-    on échange part donc du principe dans l'entête de la fonction que
+    on part donc du principe dans l'entête de la fonction que
     l'on rentre les coordonées sous la forme (y,x) pour faciliter
     l'insertion et la mise à jour des coins gauche et droit.
     */
@@ -224,24 +267,37 @@ int moteur_jeu(){
 	scanf("%d",&nb_ia);
     poser_tuile(72,72,0);
     //Boucle de jeu :
-    int i,x,y;
+    int i,x,y,encore;
     for(i=1;i<72;++i){ // Chaque itération de cette boucle est un tour de jeu
-        system("clear");
-        printf("Plateau actuel :\n");
-        afficher_grille();
-        printf("Tuile piochée :\n");
-        affiche_tuile(&pioche[i]);
-        tourner_tuile(&pioche[i]);
-        system("clear");
-        printf("Plateau actuel :\n");
-        afficher_grille();
-        printf("Tuile piochée :\n");
-        affiche_tuile(&pioche[i]);
-        printf("Entrer les coordonnées de l'emplacement où vous voulez poser la tuile : \nx (la colonne) = ");
-        scanf("%d",&x);
-        printf("y (la ligne) = ");
-        scanf("%d",&y);
-        poser_tuile(x,y,i);
+        encore=2;
+        while(encore!=0){
+            f_posable(&pioche[i]);
+            afficher_grille(i);
+            encore = tourner_tuile(&pioche[i],encore);
+            f_posable(&pioche[i]);
+            afficher_grille(i);
+            if(encore==1){
+                encore = f_encore();
+            }
+        }
+        encore = 2;
+        while(encore != 0){
+            afficher_grille(i);
+            if(encore == 1){
+                printf("La tuile n'est pas posable à ces coordonnées, veuillez en entrer des nouvelles :\nx (la colonne) = ");
+            }else{
+                printf("Entrer les coordonnées de l'emplacement où vous voulez poser la tuile : \nx (la colonne) = ");
+            }
+            scanf("%d",&x);
+            printf("y (la ligne) = ");
+            scanf("%d",&y);
+            if(tab_jeu[y][x].posable == 1){
+                poser_tuile(x,y,i);
+                encore = 0;
+            }else{
+                encore = 1;
+            }
+        }
     }
 	return 1;
 }
