@@ -1,6 +1,7 @@
 #ifndef LECTEUR_CSV
 #define LECTEUR_CSV
 
-void parseur_csv();
+void melange_tuiles();
+int parseur_csv(char*);
 
 #endif // LECTEUR_CSV

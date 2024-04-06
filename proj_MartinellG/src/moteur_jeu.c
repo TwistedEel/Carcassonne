@@ -1,146 +1,93 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <time.h>
+
 #include <sys/types.h>
+#include "lecteur_csv.h"
+#include "includes.h"
+#include "game_structures.h"
+#include "affichage.h"
+#include "ANSI-color-codes.h"
+#define j_max 5
 
-extern ssize_t getline();
-struct tuile_s{
-	int identifiant;
-	char cotes[4];
-	char centre;
-    int posee;
-    int posable;
-};
-
-struct joueur_s{
-	int points;
-	short pions_restants;
-
-};
 
 struct tuile_s pioche[72];
 struct tuile_s tab_jeu[143][143];
-int nb_joueur,nb_ia,cur_joueur,ig = 72,id=72,jg=72,jd=72;
+int ig = 72,id=72,jg=72,jd=72;
+int nb_jr=0,nb_ia=0,currentj=0;
+struct joueur_s joueuria[5];
 
-void affiche_tuile(struct tuile_s *t)
-{
-	printf("  %c \n", t->cotes[0]);
-	printf("%c %c %c\n", t->cotes[3],t->centre,t->cotes[1]);
-	printf("  %c \n", t->cotes[2]);
-}
-
-
-int parseur_csv(char* fname){
-	FILE * mon_fic = fopen(fname,"r");
-	if (mon_fic == NULL){
-		return -1;
-	}
-	char* ligne;
-	size_t len = 0;
-	char *sub_str;
-	int i,j;
-	for(i=0;i<72;++i){
-		getline(&ligne,&len,mon_fic);
-		sub_str=strtok(ligne, ",");
-		pioche[i].identifiant = i;
-		pioche[i].cotes[0]= sub_str[0];
-		for(j=1;j<4;++j){
-			sub_str=strtok(NULL, ",");
-            pioche[i].cotes[j] = sub_str[0];
+void creer_joueuria(){
+    int i,j,encore=1;
+    while(encore != 0){
+        if(encore == 2){
+            printf("Il doit y avoir entre 1 et 5 joueur/ia : \n");
         }
-        sub_str=strtok(NULL, ",");
-        if(strcmp(sub_str,"village\n")==0){
-            pioche[i].centre = 'V';
+	    printf("Entrer le nombre de joueur stp : ");
+	    scanf("%d",&nb_jr);
+	    printf("Entrer le nombre d'ia stp : ");
+	    scanf("%d",&nb_ia);
+        if(nb_jr+nb_ia<=5){
+            encore=0;
         }else{
-            pioche[i].centre = sub_str[0];
+            encore=2;
         }
     }
-	return 0;
-}
-
-void melange_tuiles(){
-    int i,j,alea,temp;
-    srand(time(NULL));
-    for(i=0;i<70;i++){
-		alea=rand()%(71-i);
-        while(alea==0){
-			alea = rand()%(71-i);
-		}
-        temp = pioche[71-i].identifiant;
-        pioche[71-i].identifiant = pioche[alea].identifiant;
-        pioche[alea].identifiant = temp;
-        for(j=0;j<4;j++){
-            temp = pioche[71-i].cotes[j];
-            pioche[71-i].cotes[j] = pioche[alea].cotes[j];
-            pioche[alea].cotes[j] = temp;
-        }
-        temp = pioche[71-i].centre;
-        pioche[71-i].centre = pioche[alea].centre;
-        pioche[alea].centre = temp;
-    }
-}
-
-void afficher_grille(int ipioche){
-    int i,j;
-    system("clear");
-    printf("Plateau actuel :\n");
-    for(i=jg-1;i<=jd+1;++i){
-        printf("  %2d  ",i);
-    }
-    printf("\n ");
-    for(j=jg-1;j<=jd+1;j++){
-            printf("----- ");
-    }
-    printf("\n");
-    for(i=ig-1;i<=id+1;i++){
-        printf("|");
-        for(j=jg-1;j<=jd+1;j++){
-            if(tab_jeu[i][j].posee==0){
-                printf("     |");
-            }else{
-                printf("  %c  |",tab_jeu[i][j].cotes[0]);
-            }
-        }
-        printf("\n");
-        printf("|");
-        for(j=jg-1;j<=jd+1;j++){
-            if(tab_jeu[i][j].posee==0){
-                if(tab_jeu[i][j].posable==1){
-                    printf("  X  |");
-                }else{
-                    printf("     |");
+    for(i = 0;i < nb_jr+nb_ia; ++i){
+        joueuria[i].points = 0;
+        joueuria[i].pions_restants = 6;
+        if(i<nb_jr){
+            joueuria[i].IA = 0;
+            encore = 1;
+            while(encore==1){
+                encore = 0;
+                printf("Entrer une couleur pour le joueur %d\n(0 = rouge ; 1 = bleu ; 2 = vert ; 3 = violet ; 4 = jaune)\nCouleur choisie :",i);
+                scanf("%d",&joueuria[i].id);
+                for(j=0;j<i;++j){
+                    if(joueuria[j].id == joueuria[i].id){
+                        encore = 1;
+                    }
                 }
-            }else{
-                printf("%c %c %c|",tab_jeu[i][j].cotes[3],tab_jeu[i][j].centre,tab_jeu[i][j].cotes[1]);
+                if(encore==1){
+                    printf("Cette couleur est déjà choisie ou invalide, réessayer :\n");
+                }
+            }
+        }else{
+            joueuria[i].IA = 1;
+            joueuria[i].id = -1;
+            encore = 1;
+            while(encore==1){
+                encore = 0;
+                for(j=0;j<i;++j){
+                    if(joueuria[j].id == joueuria[i].id){
+                        encore = 1;
+                    }
+                }
+                joueuria[i].id +=1;
             }
         }
-        printf(" %d\n",i);
-        printf("|");
-        for(j=jg-1;j<=jd+1;j++){
-            if(tab_jeu[i][j].posee==0){
-                printf("     |");
-            }else{
-                printf("  %c  |",tab_jeu[i][j].cotes[2]);
-            }
+        switch(joueuria[i].id){
+            case 0 :
+                joueuria[i].couleur = RED;
+                break;
+            case 1 :
+                joueuria[i].couleur = BLU;
+                break;
+            case 2 :
+                joueuria[i].couleur = GRN;
+                break;
+            case 3 :
+                joueuria[i].couleur = MAG;
+                break;
+            case 4 :
+                joueuria[i].couleur = YEL;
+                break;
         }
-        printf("\n");
-        printf(" ");
-        for(j=jg-1;j<=jd+1;j++){
-            printf("----- ");
-        }
-        printf("\n");
     }
-    printf("Tuile en main :\n");
-    affiche_tuile(&pioche[ipioche]);
-    return;
 }
 
 int tourner_tuile(struct tuile_s *t,int encore){
     char reponse[10],tmp;
     int i,j,valide=0,k;
     if (encore == 2){
-        printf("Voulez vous tournez la tuile de 90° dans le sens anti-horaire ?\n(Répondre 'oui' ou non') : ");
+        printf("Voulez vous tournez la tuile de 90° dans le sens anti-horaire ?\n(Répondre 'oui' ou 'non') : ");
         scanf("%s", reponse);
         if(strcmp("non",reponse)==0){
             return 0;
@@ -170,7 +117,7 @@ int f_encore(){
     int valide = 0;
     char reponse[10];
     while(valide==0){
-        printf("Voulez-vous encore tourner la tuile ? (oui ou non) : ");
+        printf("Voulez-vous encore tourner la tuile ? ('oui' ou 'non') : ");
         scanf("%s", reponse);
         valide = 1;
         if(strcmp("non",reponse)==0){
@@ -259,16 +206,15 @@ void poser_tuile(int y, int x, int i){
 
     return;
 }
+
 int moteur_jeu(){
+    int i,x,y,encore;
 	// Initialisation :
-	printf("Entrer le nombre de joueur stp : ");
-	scanf("%d",&nb_joueur);
-	printf("Entrer le nombre d'ia stp : ");
-	scanf("%d",&nb_ia);
+    creer_joueuria();
     poser_tuile(72,72,0);
     //Boucle de jeu :
-    int i,x,y,encore;
     for(i=1;i<72;++i){ // Chaque itération de cette boucle est un tour de jeu
+        currentj = (i-1)%(nb_jr+nb_ia);
         encore=2;
         while(encore!=0){
             f_posable(&pioche[i]);
@@ -326,7 +272,6 @@ int main(int argc, char * argv[])
 		//6 - màj classement
 	}
 	*/
-
 	return 0;
 }
 
