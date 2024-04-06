@@ -6,6 +6,8 @@
 #include "affichage.h"
 #include "ANSI-color-codes.h"
 #define j_max 5
+void afficher_grille(int);
+
 
 
 struct tuile_s pioche[72];
