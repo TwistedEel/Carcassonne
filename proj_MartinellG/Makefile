@@ -16,7 +16,7 @@ all: $(EXEC)
 run: $(EXEC)
 	$(BIN)$<
 
-$(EXEC): moteur_jeu.o lecteur_csv.o affichage.o
+$(EXEC): moteur_jeu.o lecteur_csv.o affichage.o pion.o
 	$(CC) $(OBJ)* $(RAY) -I $(INC) -o $(BIN)$@ -lm
 	
 moteur_jeu.o: $(SRC)moteur_jeu.c
@@ -26,6 +26,9 @@ lecteur_csv.o: $(SRC)lecteur_csv.c
 	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
 	
 affichage.o: $(SRC)affichage.c
+	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
+
+pion.o : $(SRC)pion.c
 	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
 
 clean:

@@ -5,10 +5,10 @@ struct tuile_s{
 	int identifiant;
 	char cotes[4];
 	char centre;
-    	int posee;
-    	int posable;
-    	int pcotes[4];
-    	int pcentre;
+    int posee;
+    int posable;
+    int pcotes[4];
+    int pcentre;
 };
 
 struct joueur_s{
@@ -17,6 +17,12 @@ struct joueur_s{
 	int IA;
 	int id;
 	char* couleur; //0 = rouge ; 1 = bleu ; 2 = vert ; 3 = violet ; 4 = jaune
+};
+
+struct issue{
+	int pos;
+	int x;
+	int y;
 };
 
 #endif // GAME_STRUCTURES

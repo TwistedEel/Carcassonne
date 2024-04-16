@@ -25,19 +25,19 @@ void afficher_grille(int ipioche){
         if(joueuria[i].IA==0){
             if(i == currentj){
                 switch(joueuria[i].id){
-                    case 0 :
+                    case 1 :
                         printf(RED "Joueur %d : %d points\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 1 :
+                    case 2 :
                         printf(BLU "Joueur %d : %d points\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 2 :
+                    case 3 :
                         printf(GRN "Joueur %d : %d points\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 3 :
+                    case 4 :
                         printf(MAG "Joueur %d : %d points\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 4 :
+                    case 5 :
                         printf(YEL "Joueur %d : %d points\t" reset,i+1,joueuria[i].points);
                         break;
                     }
@@ -47,19 +47,19 @@ void afficher_grille(int ipioche){
         }else{
             if(i == currentj){
                 switch(joueuria[i].id){
-                    case 0 :
+                    case 1 :
                         printf(RED "IA %d : %d points\t\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 1 :
+                    case 2 :
                         printf(BLU "IA %d : %d points\t\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 2 :
+                    case 3 :
                         printf(GRN "IA %d : %d points\t\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 3 :
+                    case 4 :
                         printf(MAG "IA %d : %d points\t\t" reset,i+1,joueuria[i].points);
                         break;
-                    case 4 :
+                    case 5 :
                         printf(YEL "IA %d : %d points\t\t" reset,i+1,joueuria[i].points);
                         break;
                     }
@@ -72,19 +72,19 @@ void afficher_grille(int ipioche){
     for(i=0;i<nb_jr+nb_ia;++i){
         if(i == currentj){
             switch(joueuria[i].id){
-                case 0 :
+                case 1 :
                     printf(RED "   pions : %d/6\t\t" reset,joueuria[i].pions_restants);
                     break;
-                case 1 :
+                case 2 :
                     printf(BLU "   pions : %d/6\t\t" reset,joueuria[i].pions_restants);
                     break;
-                case 2 :
+                case 3 :
                     printf(GRN "   pions : %d/6\t\t" reset,joueuria[i].pions_restants);
                     break;
-                case 3 :
+                case 4 :
                     printf(MAG "   pions : %d/6\t\t" reset,joueuria[i].pions_restants);
                     break;
-                case 4 :
+                case 5 :
                     printf(YEL "   pions : %d/6\t\t" reset,joueuria[i].pions_restants);
                     break;
                 }
@@ -94,7 +94,7 @@ void afficher_grille(int ipioche){
     }
     printf("\n");
     printf("\t ---------------------------------------------------------------------------\n");
-    printf("\t| r : routes\tv : villes\tp : prés\to : villages\ta : abbayes |\n");
+    printf("\t| r : routes\tv : villes\tb : blason\tp : prés\to : villages\ta : abbayes |\n");
     printf("\t ---------------------------------------------------------------------------\n");
     printf("Plateau actuel :\n");
     for(i=jg-1;i<=jd+1;++i){
