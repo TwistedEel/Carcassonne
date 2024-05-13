@@ -93,9 +93,9 @@ void afficher_grille(int ipioche){
         }
     }
     printf("\n");
-    printf("\t ---------------------------------------------------------------------------\n");
-    printf("\t| r : routes\tv : villes\tb : blason\tp : prés\to : villages\ta : abbayes |\n");
-    printf("\t ---------------------------------------------------------------------------\n");
+    printf("\t -------------------------------------------------------------------------------------------\n");
+    printf("\t| r : routes\tv : villes\tb : blason\tp : prés\to : villages\ta : abbayes |\n" reset);
+    printf("\t -------------------------------------------------------------------------------------------\n");
     printf("Plateau actuel :\n");
     for(i=jg-1;i<=jd+1;++i){
         printf("  %2d  ",i);
@@ -111,7 +111,27 @@ void afficher_grille(int ipioche){
             if(tab_jeu[i][j].posee==0){
                 printf("     |");
             }else{
-                printf("  %c  |",tab_jeu[i][j].cotes[0]);
+                if(tab_jeu[i][j].pcotes[0] == 0){
+                    printf("  %c  |",tab_jeu[i][j].cotes[0]);
+                }else{
+                    switch(tab_jeu[i][j].pcotes[0]){
+                        case 1 :
+                            printf("  " REDB"%c"reset"  |",tab_jeu[i][j].cotes[0]);
+                            break;
+                        case 2 :
+                            printf("  " BLUB"%c"reset"  |" ,tab_jeu[i][j].cotes[0]);
+                            break;
+                        case 3 :
+                            printf("  " GRNB"%c"reset"  |" ,tab_jeu[i][j].cotes[0]);
+                            break;
+                        case 4 :
+                            printf("  " MAGB"%c"reset"  |" ,tab_jeu[i][j].cotes[0]);
+                            break;
+                        case 5 :
+                            printf("  " YELB"%c"reset"  |" ,tab_jeu[i][j].cotes[0]);
+                            break;
+                    }
+                }
             }
         }
         printf("\n");
@@ -123,8 +143,70 @@ void afficher_grille(int ipioche){
                 }else{
                     printf("     |");
                 }
-            }else{
-                printf("%c %c %c|",tab_jeu[i][j].cotes[3],tab_jeu[i][j].centre,tab_jeu[i][j].cotes[1]);
+            }else{              
+                if(tab_jeu[i][j].pcotes[3] == 0){
+                    printf("%c",tab_jeu[i][j].cotes[3]);
+                }else{
+                    switch(tab_jeu[i][j].pcotes[3]){
+                        case 1 :
+                            printf(REDB"%c"reset,tab_jeu[i][j].cotes[3]);
+                            break;
+                        case 2 :
+                            printf(BLUB"%c"reset,tab_jeu[i][j].cotes[3]);
+                            break;
+                        case 3 :
+                            printf(GRNB"%c"reset,tab_jeu[i][j].cotes[3]);
+                            break;
+                        case 4 :
+                            printf(MAGB"%c"reset,tab_jeu[i][j].cotes[3]);
+                            break;
+                        case 5 :
+                            printf(YELB"%c"reset,tab_jeu[i][j].cotes[3]);
+                            break;
+                    }
+                }
+                if(tab_jeu[i][j].pcentre == 0){
+                    printf(" %c",tab_jeu[i][j].centre);
+                }else{
+                    switch(tab_jeu[i][j].pcentre){
+                        case 1 :
+                            printf(" "REDB"%c"reset,tab_jeu[i][j].centre);
+                            break;
+                        case 2 :
+                            printf(" "BLUB"%c"reset,tab_jeu[i][j].centre);
+                            break;
+                        case 3 :
+                            printf(" "GRNB"%c"reset,tab_jeu[i][j].centre);
+                            break;
+                        case 4 :
+                            printf(" "MAGB"%c"reset,tab_jeu[i][j].centre);
+                            break;
+                        case 5 :
+                            printf(" "YELB"%c"reset,tab_jeu[i][j].centre);
+                            break;
+                        }
+                }
+                if(tab_jeu[i][j].pcotes[1] == 0){
+                    printf( " %c|",tab_jeu[i][j].cotes[1]);
+                }else{
+                    switch(tab_jeu[i][j].pcotes[1]){
+                        case 1 :
+                            printf(" " REDB"%c"reset"|",tab_jeu[i][j].cotes[1]);
+                            break;
+                        case 2 :
+                            printf(" " BLUB"%c"reset"|",tab_jeu[i][j].cotes[1]);
+                            break;
+                        case 3 :
+                            printf(" " GRNB"%c"reset"|",tab_jeu[i][j].cotes[1]);
+                            break;
+                        case 4 :
+                            printf(" " MAGB"%c"reset"|",tab_jeu[i][j].cotes[1]);
+                            break;
+                        case 5 :
+                            printf(" " YELB"%c"reset"|",tab_jeu[i][j].cotes[1]);
+                            break;
+                        }
+                }
             }
         }
         printf(" %d\n",i);
@@ -133,7 +215,27 @@ void afficher_grille(int ipioche){
             if(tab_jeu[i][j].posee==0){
                 printf("     |");
             }else{
-                printf("  %c  |",tab_jeu[i][j].cotes[2]);
+                if(tab_jeu[i][j].pcotes[2] == 0){
+                    printf("  %c  |",tab_jeu[i][j].cotes[2]);
+                }else{
+                    switch(tab_jeu[i][j].pcotes[2]){
+                        case 1 :
+                            printf("  " REDB"%c"reset"  |",tab_jeu[i][j].cotes[2]);
+                            break;
+                        case 2 :
+                            printf("  " BLUB"%c"reset"  |" ,tab_jeu[i][j].cotes[2]);
+                            break;
+                        case 3 :
+                            printf("  " GRNB"%c"reset"  |" ,tab_jeu[i][j].cotes[2]);
+                            break;
+                        case 4 :
+                            printf("  " MAGB"%c"reset"  |" ,tab_jeu[i][j].cotes[2]);
+                            break;
+                        case 5 :
+                            printf("  " YELB"%c"reset"  |" ,tab_jeu[i][j].cotes[2]);
+                            break;
+                        }
+                }
             }
         }
         printf("\n");
@@ -143,8 +245,6 @@ void afficher_grille(int ipioche){
         }
         printf("\n");
     }
-    printf("Tuile en main :\n");
-    affiche_tuile(&pioche[ipioche]);
     return;
 }
 

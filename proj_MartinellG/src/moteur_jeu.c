@@ -122,7 +122,7 @@ int tourner_tuile(struct tuile_s *t, int encore)
     }
 }
 
-int f_encore()
+int tourner_encore()
 {
     int valide = 0;
     char reponse[10];
@@ -267,18 +267,24 @@ int moteur_jeu()
         {
             f_posable(&pioche[i]);
             afficher_grille(i);
+            printf("Tuile en main :\n");
+            affiche_tuile(&pioche[i]);
             encore = tourner_tuile(&pioche[i], encore);
             f_posable(&pioche[i]);
             afficher_grille(i);
+            printf("Tuile en main :\n");
+            affiche_tuile(&pioche[i]);
             if (encore == 1)
             {
-                encore = f_encore();
+                encore = tourner_encore();
             }
         }
         encore = 2;
         while (encore != 0)
         {
             afficher_grille(i);
+            printf("Tuile en main :\n");
+            affiche_tuile(&pioche[i]);
             if (encore == 1)
             {
                 printf("La tuile n'est pas posable à ces coordonnées, veuillez en entrer des nouvelles :\nx (la colonne) = ");
@@ -299,6 +305,12 @@ int moteur_jeu()
             {
                 encore = 1;
             }
+        }
+        if(joueuria[currentj].pions_restants > 0){
+            afficher_grille(i);
+            encore = poser_pion(x,y,2);
+            printf("For pity :");
+            scanf("%d", &x);
         }
     }
     return 1;
