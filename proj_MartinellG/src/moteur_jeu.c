@@ -309,8 +309,8 @@ int moteur_jeu()
         if(joueuria[currentj].pions_restants > 0){
             afficher_grille(i);
             encore = poser_pion(x,y,2);
-            printf("For pity :");
-            scanf("%d", &x);
+            printf("i");
+            scanf("%d",&x);
         }
     }
     return 1;
