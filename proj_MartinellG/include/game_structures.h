@@ -5,6 +5,7 @@ struct tuile_s{
 	int identifiant;
 	char cotes[4];
 	char centre;
+	int traitee[5];
     int posee;
     int posable;
     int pcotes[4];

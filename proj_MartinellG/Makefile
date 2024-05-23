@@ -8,6 +8,7 @@ CC = gcc
 CFLAGS = -Wall -std=c11
 EXEC = carcassonne
 RAY = $(LIB)/libraylib.a
+VAL = valgrind  --show-leak-kinds=all -s
 
 .PHONY: all run clean
 
@@ -16,7 +17,7 @@ all: $(EXEC)
 run: $(EXEC)
 	$(BIN)$<
 
-$(EXEC): moteur_jeu.o lecteur_csv.o affichage.o pion.o
+$(EXEC): moteur_jeu.o lecteur_csv.o affichage.o pion.o point.o
 	$(CC) $(OBJ)* $(RAY) -I $(INC) -o $(BIN)$@ -lm
 	
 moteur_jeu.o: $(SRC)moteur_jeu.c
@@ -29,6 +30,9 @@ affichage.o: $(SRC)affichage.c
 	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
 
 pion.o : $(SRC)pion.c
+	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
+
+point.o : $(SRC)point.c
 	$(CC) $(CFLAGS) $< -c -I $(INC) -o $(OBJ)$@
 
 clean:

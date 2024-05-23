@@ -5,6 +5,7 @@
 #include "game_structures.h"
 #include "affichage.h"
 #include "ANSI-color-codes.h"
+#include "point.h"
 #include "pion.h"
 #define j_max 5
 
@@ -13,6 +14,9 @@ struct tuile_s tab_jeu[143][143];
 int ig = 72, id = 72, jg = 72, jd = 72;
 int nb_jr = 0, nb_ia = 0, currentj = 0;
 struct joueur_s joueuria[5];
+int liste_ville[44][2];
+int len=0;
+int pions_presents[5];
 
 void creer_joueuria()
 {
@@ -21,19 +25,19 @@ void creer_joueuria()
     {
         if (encore == 2)
         {
-            printf("Il doit y avoir entre 1 et 5 joueur/ia : \n");
+            printf("Il doit y avoir entre 2 et 5 joueur/ia : \n");
         }
         printf("Entrer le nombre de joueur stp : ");
         scanf("%d", &nb_jr);
         printf("Entrer le nombre d'ia stp : ");
         scanf("%d", &nb_ia);
-        if (nb_jr + nb_ia <= 5)
+        if (nb_jr + nb_ia > 5 || nb_jr + nb_ia <= 1 || nb_jr < 0 || nb_ia < 0)
         {
-            encore = 0;
+            encore = 2;
         }
         else
         {
-            encore = 2;
+            encore = 0;
         }
     }
     for (i = 0; i < nb_jr + nb_ia; ++i)
@@ -83,72 +87,31 @@ void creer_joueuria()
     }
 }
 
-int tourner_tuile(struct tuile_s *t, int encore)
+int tourner_tuile(struct tuile_s *t)
 {
-    char reponse[10], tmp;
-    int i, j, valide = 0, k;
-    if (encore == 2)
-    {
-        printf("Voulez vous tournez la tuile de 90° dans le sens anti-horaire ?\n(Répondre 'oui' ou 'non') : ");
-        scanf("%s", reponse);
-        if (strcmp("non", reponse) == 0)
-        {
-            return 0;
+    char tmp;
+    int i, j, k;
+    printf("Combien de fois voulez vous tourner la tuile (sens anti-horaire) ? \nNombre de rotations : ");
+    scanf("%d", &k);
+    for (i = 0; i < k; ++i){
+        tmp = t->cotes[0];
+        for (j = 0; j < 3; ++j){
+            t->cotes[j] = t->cotes[j + 1];
         }
-        if (strcmp("oui", reponse) == 0)
-        {
-            valide = 1;
-        }
+        t->cotes[3] = tmp;
     }
-    if (valide != 0 || encore != 2)
-    {
-        printf("Combien de fois ? \n(Entrer un chiffre entre 1 et 3) :");
-        scanf("%d", &k);
-        for (i = 0; i < k; ++i)
-        {
-            tmp = t->cotes[0];
-            for (j = 0; j < 3; ++j)
-            {
-                t->cotes[j] = t->cotes[j + 1];
-            }
-            t->cotes[3] = tmp;
-        }
-        return 1;
-    }
-    else
-    {
-        printf("La réponse n'est pas valide, entrez une réponse valide svp : \n");
-        return tourner_tuile(t, encore);
-    }
+    return 1;
 }
 
-int tourner_encore()
-{
-    int valide = 0;
-    char reponse[10];
-    while (valide == 0)
-    {
-        printf("Voulez-vous encore tourner la tuile ? ('oui' ou 'non') : ");
-        scanf("%s", reponse);
-        valide = 1;
-        if (strcmp("non", reponse) == 0)
-        {
-            return 0;
+void tourner_auto(struct tuile_s *t,int k){
+    int i,j,tmp;
+    for (i = 0; i < k; ++i){
+        tmp = t->cotes[0];
+        for (j = 0; j < 3; ++j){
+            t->cotes[j] = t->cotes[j + 1];
         }
-        else
-        {
-            if (strcmp("oui", reponse) != 0)
-            {
-                printf("La réponse n'est pas valide, entrez une réponse valide svp : \n");
-                valide = 0;
-            }
-            else
-            {
-                return 1;
-            }
-        }
+        t->cotes[3] = tmp;
     }
-    return 0;
 }
 
 int compatible(struct tuile_s *t1, struct tuile_s *t2, int face1, int face2)
@@ -252,66 +215,129 @@ void poser_tuile(int y, int x, int i)
     return;
 }
 
-int moteur_jeu()
-{
-    int i, x, y, encore;
+void remelanger_tuile(int ipioche){
+    int i,j,temp;
+
+    //On veut une autre tuile que la notre qui est devant dans la pioche :
+    i = (rand()%(71-ipioche))+ipioche+1;
+    temp = pioche[ipioche].identifiant;
+    pioche[ipioche].identifiant = pioche[i].identifiant;
+    pioche[i].identifiant = temp;
+    for(j=0;j<4;j++){
+        temp = pioche[ipioche].cotes[j];
+        pioche[ipioche].cotes[j] = pioche[i].cotes[j];
+        pioche[i].cotes[j] = temp;
+    }
+    temp = pioche[ipioche].centre;
+    pioche[ipioche].centre = pioche[i].centre;
+    pioche[i].centre = temp;
+    return;
+}
+
+int pas_posable(int ipioche){
+    int i,j,k=0;
+    
+    while(k<4){
+        f_posable(&pioche[ipioche]);
+        for(i=ig-1;i<=id+1;i++){
+            for(j=jg-1;j<=jd+1;j++){
+                if(tab_jeu[i][j].posable == 1){
+                    return 0;
+                }
+            }
+        }
+        tourner_auto(&pioche[ipioche],1);
+        k++;
+    }
+    //Si on arrive ici c'est que peu importe comment on a tourné la tuile elle ne peut pas être placée
+    return 1;
+}
+
+int boucle_jeu(){
+    vider_pions();
+    srand(time(NULL));
+    int i, k, x, y, encore,reponse;
     // Initialisation :
+    system("clear");
     creer_joueuria();
     poser_tuile(72, 72, 0);
     // Boucle de jeu :
     for (i = 1; i < 72; ++i)
     { // Chaque itération de cette boucle est un tour de jeu
         currentj = (i - 1) % (nb_jr + nb_ia);
-        encore = 2;
-        while (encore != 0)
-        {
-            f_posable(&pioche[i]);
-            afficher_grille(i);
-            printf("Tuile en main :\n");
-            affiche_tuile(&pioche[i]);
-            encore = tourner_tuile(&pioche[i], encore);
-            f_posable(&pioche[i]);
-            afficher_grille(i);
-            printf("Tuile en main :\n");
-            affiche_tuile(&pioche[i]);
-            if (encore == 1)
-            {
-                encore = tourner_encore();
-            }
+        k=pas_posable(i);
+        while(k==1){
+            remelanger_tuile(i);
+            k=pas_posable(i);
         }
         encore = 2;
-        while (encore != 0)
-        {
+        while(encore != 0){ //Première étape dans laquelle on peut tourner et poser la tuile
             afficher_grille(i);
             printf("Tuile en main :\n");
             affiche_tuile(&pioche[i]);
-            if (encore == 1)
-            {
-                printf("La tuile n'est pas posable à ces coordonnées, veuillez en entrer des nouvelles :\nx (la colonne) = ");
-            }
-            else
-            {
-                printf("Entrer les coordonnées de l'emplacement où vous voulez poser la tuile : \nx (la colonne) = ");
-            }
-            scanf("%d", &x);
-            printf("y (la ligne) = ");
-            scanf("%d", &y);
-            if (tab_jeu[y][x].posable == 1)
-            {
-                poser_tuile(x, y, i);
-                encore = 0;
-            }
-            else
-            {
-                encore = 1;
+            printf("Actions disponibles :\n1 - Tourner la tuile\n2 - Placer la tuile\n3 - Fin de partie\n\nEntrer le numéro correspondant à l'action voulue : ");
+            scanf("%d",&reponse);
+            afficher_grille(i);
+            printf("Tuile en main :\n");
+            affiche_tuile(&pioche[i]);
+            switch(reponse){
+                case 1 :
+                    tourner_tuile(&pioche[i]);
+                    f_posable(&pioche[i]);
+                    break;
+                case 2 :
+                    if(pas_posable(i)==1){
+                        printf("Vous ne pouvez poser cette tuile nul part !\n");
+                    }else{
+                        while(encore !=0){
+                            if (encore == 1){
+                                printf("La tuile n'est pas posable à ces coordonnées, veuillez en entrer des nouvelles :\nx (la colonne) = ");
+                            }
+                            else{
+                                printf("Entrer les coordonnées de l'emplacement où vous voulez poser la tuile : \nx (la colonne) = ");
+                            }
+                            scanf("%d", &x);
+                            printf("y (la ligne) = ");
+                            scanf("%d", &y);
+                            if (tab_jeu[y][x].posable == 1){
+                                poser_tuile(x, y, i);
+                                encore = 0;
+                            }
+                            else{
+                                encore = 1;
+                            }
+                        }
+                    }
+                    break;
+                case 3 :
+                    return 1;
+                    break;
+                default :
+                    encore=2;
+                    break;
             }
         }
         if(joueuria[currentj].pions_restants > 0){
             afficher_grille(i);
-            encore = poser_pion(x,y,2);
-            printf("i");
-            scanf("%d",&x);
+            printf("Actions disponibles :\n1 - Poser un pion\n2 - Terminer le tour\n3 - Fin de partie\n\nEntrer le numéro correspondant à l'action voulue : ");
+            scanf("%d",&reponse);
+            if(reponse == 3){
+                return 1;
+            }
+            if(reponse == 1){
+                poser_pion(x,y,2);
+            }
         }
+        //A la fin du tour on regarde si la tuile a complété des structures
+        compter_point(x,y,1);
+    }
+    return 0;
+}
+
+int moteur_jeu()
+{
+    if(boucle_jeu()==1){
+        printf("fin de partie \n");
     }
     return 1;
 }
@@ -321,24 +347,5 @@ int main(int argc, char *argv[])
     parseur_csv("tuiles.csv");
     melange_tuiles();
     moteur_jeu();
-    // Détail d'un tour de jeu :
-    /*
-    int game_loop(){
-        //1 - déterminer un joueur
-        //2 - piocher une tuile
-        //	2a - tuile posable ?
-        //	2b - pioche vide ?
-        //3 - poser la tuile
-        //	3a - tuile posable ?
-        //4 - vérification de l'état des éléments (ex:route)
-        //	4a - élément créé ?
-        //	4b - élément fini ?
-        //	4c - élément continué ?
-        //5 - pion posé ?
-        //	5a - posé où ?
-        //	5b - points à attribuer ?
-        //6 - màj classement
-    }
-    */
     return 0;
 }
